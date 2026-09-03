@@ -12,6 +12,7 @@ import '../motion/digit_motion.dart';
 import '../motion/number_motion_style.dart';
 import '../motion/slot_render_data.dart';
 import '../theme/direction_colors.dart';
+import '../theme/motion_number_theme.dart';
 import 'digit_cell.dart';
 import 'motion_number_scope.dart';
 import 'separator_cell.dart';
@@ -101,14 +102,30 @@ class _MotionNumberState extends State<MotionNumber>
   Size? _stripCell;
   int? _stripRepeats;
 
+  /// Theme defaults, refreshed whenever inherited widgets change.
+  MotionNumberTheme? _theme;
+
   NumberTextFormatter get _formatter =>
       widget.formatter ?? const PlainFormatter();
 
-  DigitMotion get _motion => widget.motion ?? resolveMotionStyle(widget.style);
+  /// Explicit argument, then theme, then the style's own default.
+  DigitMotion get _motion =>
+      widget.motion ?? resolveMotionStyle(_theme?.style ?? widget.style);
 
-  Duration get _duration => widget.duration ?? _motion.defaultDuration;
+  Duration get _duration =>
+      widget.duration ?? _theme?.duration ?? _motion.defaultDuration;
 
-  Curve get _curve => widget.curve ?? _motion.defaultCurve;
+  Curve get _curve => widget.curve ?? _theme?.curve ?? _motion.defaultCurve;
+
+  DirectionColors? get _directionColors =>
+      widget.directionColors ?? _theme?.directionColors;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _theme = MotionNumberTheme.maybeOf(context);
+    _controller.duration = _duration;
+  }
 
   @override
   void initState() {
@@ -270,7 +287,7 @@ class _MotionNumberState extends State<MotionNumber>
   Widget build(BuildContext context) {
     final TextStyle base =
         widget.textStyle ?? DefaultTextStyle.of(context).style;
-    final Color? tint = widget.directionColors?.resolve(_transition.direction);
+    final Color? tint = _directionColors?.resolve(_transition.direction);
     final TextStyle styled = tint == null ? base : base.copyWith(color: tint);
     final TextStyle resolved = widget.tabularFigures
         ? DigitMetrics.withTabularFigures(styled)
@@ -331,7 +348,7 @@ class _MotionNumberState extends State<MotionNumber>
           textStyle: style,
           strip: strip,
           stripRepeats: motion.stripRepeats,
-          color: widget.directionColors?.resolve(direction),
+          color: _directionColors?.resolve(direction),
         );
 
     switch (instruction) {

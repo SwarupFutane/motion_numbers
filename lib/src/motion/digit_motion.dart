@@ -71,22 +71,26 @@ abstract class DigitMotion {
   /// every slot together, `0.5` gives the last slot a half-timeline head start
   /// on finishing. The returned value is clamped to `[0, 1]`.
   ///
-  /// Pass [reverse] to stagger right to left instead.
+  /// Pass [reverse] to stagger right to left instead, or [allowOvershoot] to
+  /// keep values above `1` — an overshooting curve such as `elasticOut` needs
+  /// them, and clamping would quietly flatten the bounce.
   static double stagger(
     double globalT,
     int slotIndex,
     int slotCount, {
     required double amount,
     bool reverse = false,
+    bool allowOvershoot = false,
   }) {
     assert(amount >= 0 && amount < 1, 'amount must be in [0, 1)');
+    final double upper = allowOvershoot ? double.infinity : 1.0;
     if (slotCount <= 1 || amount == 0) {
-      return globalT.clamp(0.0, 1.0);
+      return globalT.clamp(0.0, upper);
     }
     final int index = reverse ? slotCount - 1 - slotIndex : slotIndex;
     final double delay = amount * (index / (slotCount - 1));
     final double span = 1 - amount;
-    return ((globalT - delay) / span).clamp(0.0, 1.0);
+    return ((globalT - delay) / span).clamp(0.0, upper);
   }
 
   /// The signed number of steps along the shortest path from [from] to [to].
@@ -125,8 +129,14 @@ abstract class DigitMotion {
   /// by `-position * cellHeight` shows the right digit. Downward paths start a
   /// revolution higher, which keeps the position positive without needing a
   /// third copy of the strip.
+  ///
+  /// A path spanning several revolutions — `slotMachine` — is offset by as many
+  /// revolutions as it needs, so the position stays inside a strip of
+  /// [stripRepeats] copies whatever the distance.
   static double stripPosition(int from, double distance, double t) {
-    final double base = distance < 0 ? from + 10.0 : from.toDouble();
+    final double base = distance < 0
+        ? from + (-distance / 10).ceil() * 10.0
+        : from.toDouble();
     return base + distance * t;
   }
 }

@@ -1,5 +1,11 @@
 import 'digit_motion.dart';
+import 'styles/elastic_motion.dart';
+import 'styles/flip_motion.dart';
+import 'styles/odometer_motion.dart';
 import 'styles/rolling_motion.dart';
+import 'styles/shuffle_motion.dart';
+import 'styles/slot_machine_motion.dart';
+import 'styles/wave_motion.dart';
 
 /// The built-in motion styles.
 ///
@@ -32,13 +38,11 @@ enum NumberMotionStyle {
 ///
 /// Every style is a const singleton, so resolving costs nothing per frame.
 DigitMotion resolveMotionStyle(NumberMotionStyle style) => switch (style) {
-  // Step 8 replaces these placeholders with the real implementations. The
-  // widget layer must not need editing when that happens.
   NumberMotionStyle.rolling => const RollingMotion(),
-  NumberMotionStyle.odometer => const RollingMotion(),
-  NumberMotionStyle.slotMachine => const RollingMotion(),
-  NumberMotionStyle.flip => const RollingMotion(),
-  NumberMotionStyle.wave => const RollingMotion(),
-  NumberMotionStyle.shuffle => const RollingMotion(),
-  NumberMotionStyle.elastic => const RollingMotion(),
+  NumberMotionStyle.odometer => const OdometerMotion(),
+  NumberMotionStyle.slotMachine => const SlotMachineMotion(),
+  NumberMotionStyle.flip => const FlipMotion(),
+  NumberMotionStyle.wave => const WaveMotion(),
+  NumberMotionStyle.shuffle => const ShuffleMotion(),
+  NumberMotionStyle.elastic => const ElasticMotion(),
 };
