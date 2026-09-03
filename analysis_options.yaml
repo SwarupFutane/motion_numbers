@@ -1,0 +1,20 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+  language:
+    strict-casts: true
+    strict-raw-types: true
+
+linter:
+  rules:
+    - public_member_api_docs      # forces dartdoc on every public member
+    - prefer_const_constructors
+    # Inert at our declared SDK floor (^3.8.0): the rule self-disables for
+    # language version >= 3.7, where `dart format`'s tall style already
+    # enforces trailing commas. Kept for intent, and in case the floor drops.
+    - require_trailing_commas
+
+# Additional information about this file can be found at
+# https://dart.dev/guides/language/analysis-options

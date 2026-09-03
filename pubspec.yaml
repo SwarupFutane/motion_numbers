@@ -1,0 +1,30 @@
+name: motion_number
+description: >-
+  Direction-aware animated numbers for Flutter. Digits roll independently in
+  seven styles - rolling, odometer, flip, slot machine, wave, shuffle, elastic -
+  plus percentage deltas.
+version: 0.1.0
+repository: https://github.com/SwarupFutane/motion_numbers
+issue_tracker: https://github.com/SwarupFutane/motion_numbers/issues
+documentation: https://github.com/SwarupFutane/motion_numbers#readme
+
+topics:
+  - animation
+  - number
+  - counter
+  - ui
+  - widgets
+
+environment:
+  sdk: ^3.8.0
+  flutter: ">=3.19.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  intl: ^0.20.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
