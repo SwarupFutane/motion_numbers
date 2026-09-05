@@ -1,0 +1,5 @@
+# Tag declarations for the suite. Declaring a tag here is what lets
+# `flutter test --tags golden` / `-x golden` select it without a warning.
+tags:
+  golden:
+    # Pixel baselines. Recorded on Linux only — see test/golden/README.md.

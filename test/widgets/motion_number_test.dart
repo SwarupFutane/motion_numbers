@@ -218,6 +218,40 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('diffs from the digits on screen, not the abandoned target', (
+      WidgetTester tester,
+    ) async {
+      // One ungrouped digit on a linear second, so the sampled frame lands on
+      // an exact controller value and the visible digit is arithmetic, not a
+      // guess: rolling 0 -> 5 is a tie broken upwards, so t = 0.5 shows 2.5,
+      // which renders as 3.
+      Widget at(int value) => host(
+        MotionNumber(
+          value: value,
+          duration: const Duration(milliseconds: 1000),
+          curve: Curves.linear,
+          formatter: const PlainFormatter(grouped: false),
+        ),
+      );
+
+      await tester.pumpWidget(at(0));
+      await tester.pumpWidget(at(5));
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // Interrupt: the replacement must start from what the user can see.
+      await tester.pumpWidget(at(9));
+      await tester.pump(Duration.zero);
+
+      final DigitCell cell = tester.widget<DigitCell>(find.byType(DigitCell));
+      expect(
+        cell.data.fromDigit,
+        3,
+        reason: 'starting at 0 would rewind; starting at 5 would jump ahead',
+      );
+
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('survives rapid successive updates', (
       WidgetTester tester,
     ) async {
@@ -249,6 +283,31 @@ void main() {
         find.byType(DigitCell),
       );
       expect(cells.every((DigitCell c) => c.t == 1.0), isTrue);
+
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('shows the new value, not the old one', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        host(const MotionNumber(value: 111), disableAnimations: true),
+      );
+      await tester.pumpWidget(
+        host(const MotionNumber(value: 999), disableAnimations: true),
+      );
+      await tester.pump(Duration.zero);
+
+      // No motion is only half the contract; the digits must also be right.
+      final Iterable<DigitCell> cells = tester.widgetList<DigitCell>(
+        find.byType(DigitCell),
+      );
+      expect(cells.map((DigitCell c) => c.data.toDigit), everyElement(9));
+      expect(
+        tester.getSemantics(find.byType(MotionNumber)).label,
+        '999',
+        reason: 'the announcement must not lag the display',
+      );
 
       await tester.pumpAndSettle();
     });
