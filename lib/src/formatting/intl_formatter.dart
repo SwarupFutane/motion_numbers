@@ -9,9 +9,12 @@ import 'number_text_formatter.dart';
 /// `124,350` — a pattern no fixed-width grouper can produce.
 ///
 /// ```dart
-/// IntlFormatter.currency(locale: 'en_IN', symbol: '₹').format(124350);
-/// // ₹1,24,350
+/// IntlFormatter.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0)
+///     .format(124350); // ₹1,24,350
 /// ```
+///
+/// Without `decimalDigits: 0` the locale's own precision applies, which for
+/// `en_IN` is two places: `₹1,24,350.00`.
 ///
 /// Locale auto-detection and currency conversion are deliberately out of
 /// scope: pass whichever [NumberFormat] you want.
