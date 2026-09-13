@@ -4,10 +4,6 @@ Numbers that **arrive** instead of appearing. Every digit rolls on its own
 timeline, the motion knows whether the value went up or down, and seven styles
 share one animation controller.
 
-<!-- HERO GIF — recorded in Phase 7 from the example app. Absolute URL, because
-     pub.dev does not resolve relative paths. -->
-![motion_number rolling a currency value](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/hero.gif)
-
 ```dart
 MotionNumber(value: 131890)
 ```
@@ -36,22 +32,22 @@ instead of snapping.
 
 ## The seven styles
 
-<!-- One short loop per style, recorded in Phase 7. Keep each under ~1 MB: the
-     README loads on every package view. -->
+<!-- One short loop per style. Keep each under ~1 MB: the README loads on every
+     package view. -->
 
 | rolling | odometer | slotMachine |
 |---|---|---|
-| ![rolling](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/rolling.gif) | ![odometer](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/odometer.gif) | ![slot machine](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/slot_machine.gif) |
+| ![rolling](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/rolling.webp) | ![odometer](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/odometer.webp) | ![slot machine](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/slot_machine.webp) |
 | Shortest path, direction-aware. Clean and financial. The default. | A mechanical dial, always continuous, carrying `9 → 0`. | Extra revolutions before settling, staggered hard. |
 
 | flip | wave | shuffle |
 |---|---|---|
-| ![flip](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/flip.gif) | ![wave](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/wave.gif) | ![shuffle](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/shuffle.gif) |
+| ![flip](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/flip.webp) | ![wave](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/wave.webp) | ![shuffle](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/shuffle.webp) |
 | Split-flap board: the old digit folds away, the new one falls in. | Rolling with a sinusoidal offset across the row. | Random digits, then a settle. The "decrypting" look. |
 
 | elastic |
 |---|
-| ![elastic](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/elastic.gif) |
+| ![elastic](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/elastic.webp) |
 | Rolling with overshoot and a small scale pop. |
 
 ```dart

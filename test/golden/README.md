@@ -4,6 +4,13 @@
 
 ## Record them on Linux, once
 
+The simplest route is the **Record goldens** workflow: run it from the GitHub
+Actions tab, download the `goldens` artifact, unzip it into
+`test/golden/goldens/` and commit. It renders on the same `ubuntu-latest` image
+CI compares against. CI skips the golden tier until those files exist.
+
+On a Linux machine you can record directly:
+
 ```bash
 flutter test --tags golden --update-goldens
 ```
