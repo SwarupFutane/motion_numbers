@@ -1,0 +1,36 @@
+# What stays out of the pub.dev archive.
+#
+# Once this file exists, pub stops reading .gitignore for this directory, so
+# every rule from .gitignore is repeated here. Keep the two in sync.
+
+# --- Copied from .gitignore -------------------------------------------------
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+/pubspec.lock
+**/doc/api/
+.dart_tool/
+.flutter-plugins-dependencies
+/build/
+/coverage/
+.widget_preview/
+
+# --- Publish-only ---------------------------------------------------------
+# The README loads these from raw.githubusercontent.com by absolute URL, so
+# shipping them would only add megabytes to every download.
+/doc/*.webp
+
+# CI configuration is repository plumbing, not package content.
+/.github/

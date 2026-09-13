@@ -1,24 +1,26 @@
 # doc/ — README media
 
-The eight files the README links to. They are captured by hand from the example
-app; until they are recorded and pushed to `main`, the images in the README
-render as broken links on GitHub and pub.dev.
+The seven animated WebP files the README links to, one short loop per style.
+They are captured by hand from the example app; until they are pushed to
+`main`, the images in the README render as broken links on GitHub and pub.dev.
 
-| File | Shows |
+| File | Style |
 |---|---|
-| `hero.gif` | Above the fold. A currency value rolling, with the delta beside it. |
-| `rolling.gif` | One short loop per style — |
-| `odometer.gif` | short enough to read at a glance, |
-| `slot_machine.gif` | long enough to show the settle. |
-| `flip.gif` | |
-| `wave.gif` | |
-| `shuffle.gif` | |
-| `elastic.gif` | |
+| `rolling.webp` | `NumberMotionStyle.rolling` |
+| `odometer.webp` | `NumberMotionStyle.odometer` |
+| `slot_machine.webp` | `NumberMotionStyle.slotMachine` |
+| `flip.webp` | `NumberMotionStyle.flip` |
+| `wave.webp` | `NumberMotionStyle.wave` |
+| `shuffle.webp` | `NumberMotionStyle.shuffle` |
+| `elastic.webp` | `NumberMotionStyle.elastic` |
 
 ## Rules
 
-- **Under ~1 MB each.** The README loads on every package view, and `hero.gif`
-  is the first impression. A 6 MB hero is the classic mistake here.
+- **Animated WebP, not GIF.** GIF stores frame delays in hundredths of a
+  second, so 60 fps is impossible and fast frames get clamped by browsers. WebP
+  stores milliseconds, keeps full colour, and is typically 2–3× smaller.
+- **Under ~1 MB each.** The README loads on every package view. Trim to one
+  up-and-down loop or reduce the width before lowering the frame rate.
 - **Linked by absolute URL**, already written that way in the README:
   `https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/<file>`.
   pub.dev does not resolve relative paths — a relative link renders on GitHub
