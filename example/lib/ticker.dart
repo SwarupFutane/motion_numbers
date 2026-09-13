@@ -45,9 +45,8 @@ class Holding {
 
 /// A fake market feed: a seeded random walk over a handful of holdings.
 ///
-/// Seeded deliberately. The README GIFs are recorded from this, and a feed that
-/// produced a different sequence on every run would make a re-recording
-/// impossible to match against the one it replaces.
+/// Seeded deliberately: the same run produces the same sequence, so a demo or
+/// a screen recording can be repeated and match the one before it.
 class PortfolioTicker extends ChangeNotifier {
   /// Creates a ticker, stopped, at its opening prices.
   PortfolioTicker({int seed = 7, this.interval = const Duration(seconds: 2)})
@@ -108,8 +107,7 @@ class PortfolioTicker extends ChangeNotifier {
   /// a real timer.
   void tick() {
     _holdings = <Holding>[
-      for (final Holding holding in _holdings)
-        holding.at(_nextPrice(holding)),
+      for (final Holding holding in _holdings) holding.at(_nextPrice(holding)),
     ];
     notifyListeners();
   }

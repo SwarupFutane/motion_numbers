@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:motion_number/motion_number.dart';
 
+import '../app_theme.dart';
 import '../tuning.dart';
-import '../widgets/style_selector.dart';
+import '../widgets/ios.dart';
 
 /// One stop on the guided tour, and the thing it is there to demonstrate.
 @immutable
@@ -29,7 +30,7 @@ class GalleryScreen extends StatefulWidget {
   /// The tuning shared across the whole demo.
   final MotionTuning tuning;
 
-  /// Called when the style chips change the selection.
+  /// Called when a style row is tapped.
   final ValueChanged<MotionTuning> onTuningChanged;
 
   @override
@@ -68,48 +69,47 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final MotionTuning tuning = widget.tuning;
+    final Color label = resolveColor(CupertinoColors.label, context);
+    final Color secondary = resolveColor(
+      CupertinoColors.secondaryLabel,
+      context,
+    );
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+    return IosPage(
+      title: 'Gallery',
       children: <Widget>[
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerHighest,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: MotionNumberScope(
-              child: Column(
-                children: <Widget>[
-                  FittedBox(
-                    child: MotionNumber(
-                      value: _step.value,
-                      motion: tuning.motion,
-                      duration: tuning.duration,
-                      formatter: const PlainFormatter(prefix: '\u20b9'),
-                      textStyle: theme.textTheme.displayLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                      directionColors: const DirectionColors.greenUp(),
-                    ),
+        HeroCard(
+          child: MotionNumberScope(
+            child: Column(
+              children: <Widget>[
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: MotionNumber(
+                    value: _step.value,
+                    motion: tuning.motion,
+                    duration: tuning.duration,
+                    formatter: const PlainFormatter(prefix: '₹'),
+                    textStyle: AppType.number(56).copyWith(color: label),
+                    directionColors: iosDirectionColors(context),
                   ),
-                  const SizedBox(height: 8),
-                  const MotionDelta(),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+                const MotionDelta(),
+              ],
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 56,
-          child: Center(
-            child: Text(
-              _step.note,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: SizedBox(
+            height: 64,
+            child: Center(
+              child: Text(
+                _step.note,
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                style: AppType.subheadline.copyWith(color: secondary),
               ),
             ),
           ),
@@ -118,64 +118,57 @@ class _GalleryScreenState extends State<GalleryScreen> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            OutlinedButton.icon(
+            PillButton(
+              label: 'Back',
+              icon: CupertinoIcons.chevron_left,
+              style: PillStyle.tinted,
               onPressed: () => _go(-1),
-              icon: const Icon(Icons.chevron_left),
-              label: const Text('Back'),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 16),
             Text(
               '${_index + 1} / ${_tour.length}',
-              style: theme.textTheme.labelLarge,
+              style: AppType.subheadline.copyWith(
+                color: secondary,
+                fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+              ),
             ),
-            const SizedBox(width: 12),
-            FilledButton.icon(
+            const SizedBox(width: 16),
+            PillButton(
+              label: 'Next',
+              icon: CupertinoIcons.chevron_right,
               onPressed: () => _go(1),
-              icon: const Icon(Icons.chevron_right),
-              label: const Text('Next'),
             ),
           ],
         ),
-        const SizedBox(height: 28),
-        Text('Style', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Text(
-          styleBlurb(tuning.style),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 12),
-        StyleSelector(
-          value: tuning.style,
-          onChanged: (NumberMotionStyle style) =>
-              widget.onTuningChanged(tuning.withStyleDefaults(style)),
-        ),
         const SizedBox(height: 32),
-        Text('All seven, same value', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 4),
-        Text(
-          'One value change, seven strategies, one animation controller each. '
-          'Stepping the tour above drives every row at once.',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+        IosSection(
+          header: 'Styles',
+          footer:
+              '${styleBlurb(tuning.style)} Every row animates the same value, '
+              'so stepping the tour drives all seven at once.',
+          padding: EdgeInsets.zero,
+          child: Column(
+            children: <Widget>[
+              for (final NumberMotionStyle style
+                  in NumberMotionStyle.values) ...<Widget>[
+                if (style != NumberMotionStyle.values.first) const IosDivider(),
+                _StyleRow(
+                  style: style,
+                  value: _step.value,
+                  selected: style == tuning.style,
+                  onTap: () =>
+                      widget.onTuningChanged(tuning.withStyleDefaults(style)),
+                ),
+              ],
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        for (final NumberMotionStyle style in NumberMotionStyle.values)
-          _StyleRow(
-            style: style,
-            value: _step.value,
-            selected: style == tuning.style,
-            onTap: () =>
-                widget.onTuningChanged(tuning.withStyleDefaults(style)),
-          ),
       ],
     );
   }
 }
 
-/// One line of the comparison list: a style's name and that style animating.
+/// One row of the style list: name, that style animating, and a checkmark.
 class _StyleRow extends StatelessWidget {
   const _StyleRow({
     required this.style,
@@ -191,31 +184,53 @@ class _StyleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          children: <Widget>[
-            SizedBox(
-              width: 104,
-              child: Text(
+    final Color label = resolveColor(CupertinoColors.label, context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 11, 12, 11),
+          child: Row(
+            children: <Widget>[
+              Text(
                 styleLabel(style),
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: selected ? theme.colorScheme.primary : null,
-                  fontWeight: selected ? FontWeight.w700 : null,
+                style: AppType.body.copyWith(color: label),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: MotionNumber(
+                      value: value,
+                      style: style,
+                      textStyle: AppType.number(
+                        20,
+                        weight: FontWeight.w500,
+                      ).copyWith(color: label),
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const Spacer(),
-            MotionNumber(
-              value: value,
-              style: style,
-              textStyle: theme.textTheme.headlineSmall,
-            ),
-          ],
+              SizedBox(
+                width: 32,
+                child: selected
+                    ? Icon(
+                        CupertinoIcons.checkmark_alt,
+                        size: 22,
+                        color: resolveColor(
+                          CupertinoColors.systemBlue,
+                          context,
+                        ),
+                      )
+                    : null,
+              ),
+            ],
+          ),
         ),
       ),
     );

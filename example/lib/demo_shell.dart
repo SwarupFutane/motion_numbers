@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:motion_number/motion_number.dart';
 
 import 'screens/gallery_screen.dart';
@@ -25,79 +25,34 @@ class DemoShell extends StatefulWidget {
 }
 
 class _DemoShellState extends State<DemoShell> {
-  int _tab = 0;
   MotionTuning _tuning = MotionTuning.defaultsFor(NumberMotionStyle.rolling);
 
   void _setTuning(MotionTuning next) => setState(() => _tuning = next);
 
-  Future<void> _openRecorder() async {
-    final NumberMotionStyle? style = await showModalBottomSheet<
-      NumberMotionStyle
-    >(
-      context: context,
-      builder: (BuildContext context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            const ListTile(
-              title: Text('Record'),
-              subtitle: Text(
-                'Opens the chrome-free loop used for the README GIFs.',
-              ),
-            ),
-            const Divider(height: 1),
-            for (final NumberMotionStyle style in NumberMotionStyle.values)
-              ListTile(
-                title: Text(styleLabel(style)),
-                subtitle: Text(recordRouteFor(style)),
-                onTap: () => Navigator.of(context).pop(style),
-              ),
-          ],
-        ),
-      ),
-    );
-    if (style != null && mounted) {
-      await Navigator.of(context).pushNamed(recordRouteFor(style));
-    }
-  }
-
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('motion_number'),
-      actions: <Widget>[
-        IconButton(
-          tooltip: 'Recording rig',
-          icon: const Icon(Icons.radio_button_checked),
-          onPressed: _openRecorder,
-        ),
-      ],
-    ),
-    body: switch (_tab) {
-      0 => GalleryScreen(tuning: _tuning, onTuningChanged: _setTuning),
-      1 => PortfolioScreen(ticker: widget.ticker, tuning: _tuning),
-      _ => PlaygroundScreen(tuning: _tuning, onTuningChanged: _setTuning),
-    },
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: _tab,
-      onDestinationSelected: (int index) => setState(() => _tab = index),
-      destinations: const <NavigationDestination>[
-        NavigationDestination(
-          icon: Icon(Icons.auto_awesome_motion_outlined),
-          selectedIcon: Icon(Icons.auto_awesome_motion),
+  Widget build(BuildContext context) => CupertinoTabScaffold(
+    tabBar: CupertinoTabBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(CupertinoIcons.sparkles),
           label: 'Gallery',
         ),
-        NavigationDestination(
-          icon: Icon(Icons.trending_up_outlined),
-          selectedIcon: Icon(Icons.trending_up),
+        BottomNavigationBarItem(
+          icon: Icon(CupertinoIcons.chart_bar_alt_fill),
           label: 'Portfolio',
         ),
-        NavigationDestination(
-          icon: Icon(Icons.tune_outlined),
-          selectedIcon: Icon(Icons.tune),
+        BottomNavigationBarItem(
+          icon: Icon(CupertinoIcons.slider_horizontal_3),
           label: 'Playground',
         ),
       ],
     ),
+    // No per-tab CupertinoTabView: a tab view captures its builder in the
+    // first route it creates, so the shared tuning would stop reaching it.
+    tabBuilder: (BuildContext context, int index) => switch (index) {
+      0 => GalleryScreen(tuning: _tuning, onTuningChanged: _setTuning),
+      1 => PortfolioScreen(ticker: widget.ticker, tuning: _tuning),
+      _ => PlaygroundScreen(tuning: _tuning, onTuningChanged: _setTuning),
+    },
   );
 }

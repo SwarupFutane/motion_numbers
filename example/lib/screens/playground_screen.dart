@@ -1,11 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:motion_number/motion_number.dart';
 
+import '../app_theme.dart';
 import '../tuning.dart';
-import '../widgets/labeled_slider.dart';
+import '../widgets/ios.dart';
 import '../widgets/style_selector.dart';
 
 /// Job three: the parameters, as controls rather than as prose.
@@ -66,148 +67,179 @@ class _PlaygroundScreenState extends State<PlaygroundScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     final MotionTuning tuning = widget.tuning;
+    final Color label = resolveColor(CupertinoColors.label, context);
+    final Color secondary = resolveColor(
+      CupertinoColors.secondaryLabel,
+      context,
+    );
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+    return IosPage(
+      title: 'Playground',
       children: <Widget>[
-        Card(
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerHighest,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 36),
-            child: Center(
-              child: FittedBox(
-                child: MotionNumber(
-                  value: _value,
-                  motion: tuning.motion,
-                  duration: tuning.duration,
-                  textStyle: theme.textTheme.displayLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+        HeroCard(
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: MotionNumber(
+                value: _value,
+                motion: tuning.motion,
+                duration: tuning.duration,
+                textStyle: AppType.number(56).copyWith(color: label),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            FilledButton.icon(
+            PillButton(
+              label: 'Change value',
+              icon: CupertinoIcons.arrow_2_circlepath,
               onPressed: _advance,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Change the value'),
             ),
-            const SizedBox(width: 12),
-            OutlinedButton.icon(
+            const SizedBox(width: 10),
+            PillButton(
+              label: _repeat != null ? 'Stop' : 'Loop',
+              icon: _repeat != null
+                  ? CupertinoIcons.stop_fill
+                  : CupertinoIcons.repeat,
+              style: PillStyle.tinted,
               onPressed: _toggleRepeat,
-              icon: Icon(_repeat != null ? Icons.stop : Icons.loop),
-              label: Text(_repeat != null ? 'Stop looping' : 'Loop'),
             ),
           ],
         ),
-        const SizedBox(height: 28),
+        const SizedBox(height: 32),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 0, 32, 8),
+          child: Text(
+            'STYLE',
+            style: AppType.footnote.copyWith(color: secondary),
+          ),
+        ),
         StyleSelector(
           value: tuning.style,
           onChanged: (NumberMotionStyle style) =>
               widget.onTuningChanged(tuning.withStyleDefaults(style)),
         ),
-        const SizedBox(height: 8),
-        Text(
-          styleBlurb(tuning.style),
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 8, 32, 28),
+          child: Text(
+            styleBlurb(tuning.style),
+            style: AppType.footnote.copyWith(color: secondary),
           ),
         ),
-        const SizedBox(height: 20),
-        LabeledSlider(
-          label: 'duration',
-          readout: '${tuning.duration.inMilliseconds} ms',
-          value: tuning.duration.inMilliseconds.toDouble(),
-          min: 150,
-          max: 2500,
-          divisions: 47,
-          onChanged: (double ms) => widget.onTuningChanged(
-            tuning.copyWith(duration: Duration(milliseconds: ms.round())),
+        IosSection(
+          header: 'Timing',
+          footer:
+              'Stagger is the per-slot time offset that makes digits arrive in '
+              'sequence rather than together. Drag it to zero to see the '
+              'difference.',
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            children: <Widget>[
+              SliderRow(
+                label: 'Duration',
+                readout: '${tuning.duration.inMilliseconds} ms',
+                value: tuning.duration.inMilliseconds.toDouble(),
+                min: 150,
+                max: 2500,
+                divisions: 47,
+                onChanged: (double ms) => widget.onTuningChanged(
+                  tuning.copyWith(duration: Duration(milliseconds: ms.round())),
+                ),
+              ),
+              const IosDivider(),
+              SliderRow(
+                label: 'Stagger',
+                readout: tuning.stagger.toStringAsFixed(2),
+                value: tuning.stagger,
+                min: 0,
+                max: MotionTuning.maxStagger,
+                divisions: 19,
+                disabledReason: 'odometer wheels share one shaft',
+                onChanged: tuning.staggerApplies
+                    ? (double amount) => widget.onTuningChanged(
+                        tuning.copyWith(stagger: amount),
+                      )
+                    : null,
+              ),
+            ],
           ),
         ),
-        LabeledSlider(
-          label: 'staggerAmount',
-          readout: tuning.stagger.toStringAsFixed(2),
-          value: tuning.stagger,
-          min: 0,
-          max: MotionTuning.maxStagger,
-          divisions: 19,
-          disabledReason: 'odometer wheels share one shaft',
-          onChanged: tuning.staggerApplies
-              ? (double amount) =>
-                    widget.onTuningChanged(tuning.copyWith(stagger: amount))
-              : null,
+        IosSection(
+          header: 'Code',
+          padding: const EdgeInsets.fromLTRB(16, 12, 4, 12),
+          child: _Snippet(code: tuning.snippet),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Stagger is what separates this from a tweened counter: it is the '
-          'per-slot time offset that makes the digits arrive in sequence '
-          'rather than together. Drag it to zero to see the difference.',
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 28),
-        _Snippet(code: tuning.snippet),
       ],
     );
   }
 }
 
 /// The live code for the current tuning, ready to paste.
-class _Snippet extends StatelessWidget {
+class _Snippet extends StatefulWidget {
   const _Snippet({required this.code});
 
   final String code;
 
   @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+  State<_Snippet> createState() => _SnippetState();
+}
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: SelectableText(
-              code,
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontFamily: 'monospace',
-                height: 1.5,
-              ),
+class _SnippetState extends State<_Snippet> {
+  bool _copied = false;
+  Timer? _reset;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.code));
+    if (!mounted) {
+      return;
+    }
+    setState(() => _copied = true);
+    _reset?.cancel();
+    _reset = Timer(const Duration(milliseconds: 1400), () {
+      if (mounted) {
+        setState(() => _copied = false);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _reset?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: <Widget>[
+      Expanded(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Text(
+            widget.code,
+            style: AppType.code.copyWith(
+              color: resolveColor(CupertinoColors.label, context),
             ),
           ),
-          IconButton(
-            tooltip: 'Copy',
-            icon: const Icon(Icons.copy_all_outlined, size: 18),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: code));
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Copied'),
-                    duration: Duration(seconds: 1),
-                  ),
-                );
-              }
-            },
-          ),
-        ],
+        ),
       ),
-    );
-  }
+      CupertinoButton(
+        onPressed: _copy,
+        padding: const EdgeInsets.all(8),
+        minimumSize: const Size(44, 44),
+        child: Icon(
+          _copied ? CupertinoIcons.checkmark_alt : CupertinoIcons.doc_on_doc,
+          size: 20,
+          color: resolveColor(
+            _copied ? CupertinoColors.systemGreen : CupertinoColors.systemBlue,
+            context,
+          ),
+          semanticLabel: _copied ? 'Copied' : 'Copy',
+        ),
+      ),
+    ],
+  );
 }

@@ -1,14 +1,12 @@
 import 'package:example/main.dart';
-import 'package:example/screens/record_screen.dart';
 import 'package:example/ticker.dart';
-import 'package:example/tuning.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motion_number/motion_number.dart';
 
 /// Pumps the demo on a surface tall enough to build the whole of a screen.
 ///
-/// Every screen is a `ListView`, so on the default 800x600 test viewport the
+/// Every screen is a scroll view, so on the default 800x600 test viewport the
 /// controls below the fold are never built and a finder for them reports an
 /// empty list rather than a layout problem.
 Future<void> pumpDemo(WidgetTester tester) async {
@@ -18,6 +16,13 @@ Future<void> pumpDemo(WidgetTester tester) async {
   await tester.pump();
 }
 
+/// A tab bar label. The large navigation title repeats the same text, so a
+/// bare `find.text` would match both.
+Finder tab(String label) => find.descendant(
+  of: find.byType(CupertinoTabBar),
+  matching: find.text(label),
+);
+
 void main() {
   group('DemoShell', () {
     testWidgets('opens on the gallery with all three tabs reachable', (
@@ -25,11 +30,12 @@ void main() {
     ) async {
       await pumpDemo(tester);
 
-      expect(find.text('Gallery'), findsOneWidget);
-      expect(find.text('Portfolio'), findsOneWidget);
-      expect(find.text('Playground'), findsOneWidget);
+      expect(tab('Gallery'), findsOneWidget);
+      expect(tab('Portfolio'), findsOneWidget);
+      expect(tab('Playground'), findsOneWidget);
       // The gallery's tour caption, so we know which tab is showing.
       expect(find.textContaining('A starting balance'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('the tour advances a step at a time', (
@@ -38,7 +44,7 @@ void main() {
       await pumpDemo(tester);
 
       expect(find.text('1 / 11'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Next'));
+      await tester.tap(find.text('Next'));
       await tester.pump();
       expect(find.text('2 / 11'), findsOneWidget);
     });
@@ -48,15 +54,17 @@ void main() {
     ) async {
       await pumpDemo(tester);
 
-      await tester.tap(find.widgetWithText(ChoiceChip, 'odometer'));
+      await tester.tap(find.text('odometer'));
       await tester.pump();
 
-      await tester.tap(find.text('Playground'));
+      await tester.tap(tab('Playground'));
       await tester.pumpAndSettle();
 
       // Stagger is meaningless for odometer, so the slider says why.
       expect(find.text('odometer wheels share one shaft'), findsOneWidget);
-      final Slider stagger = tester.widget<Slider>(find.byType(Slider).last);
+      final CupertinoSlider stagger = tester.widget<CupertinoSlider>(
+        find.byType(CupertinoSlider).last,
+      );
       expect(stagger.onChanged, isNull);
     });
 
@@ -65,12 +73,15 @@ void main() {
     ) async {
       await pumpDemo(tester);
 
-      await tester.tap(find.text('Playground'));
+      await tester.tap(tab('Playground'));
       await tester.pumpAndSettle();
 
-      final Slider stagger = tester.widget<Slider>(find.byType(Slider).last);
+      final CupertinoSlider stagger = tester.widget<CupertinoSlider>(
+        find.byType(CupertinoSlider).last,
+      );
       expect(stagger.onChanged, isNotNull);
       expect(stagger.value, const RollingMotion().staggerAmount);
+      expect(tester.takeException(), isNull);
     });
   });
 
@@ -80,13 +91,13 @@ void main() {
     ) async {
       await pumpDemo(tester);
 
-      await tester.tap(find.text('Portfolio'));
+      await tester.tap(tab('Portfolio'));
       await tester.pumpAndSettle();
 
       expect(find.text('ARLO'), findsOneWidget);
       expect(find.text('Portfolio value'), findsOneWidget);
 
-      await tester.tap(find.widgetWithText(OutlinedButton, 'One tick'));
+      await tester.tap(find.text('Tick'));
       await tester.pump();
 
       // Each row sits under its own scope. A shared one would make every
@@ -98,6 +109,30 @@ void main() {
         ),
       );
       expect(scopeAround('ARLO'), isNot(scopeAround('KVAN')));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('Layout', () {
+    testWidgets('every tab lays out on a small phone without overflow', (
+      WidgetTester tester,
+    ) async {
+      // iPhone SE (3rd gen) logical size: the narrowest screen worth supporting.
+      await tester.binding.setSurfaceSize(const Size(375, 667));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      await tester.pumpWidget(const MotionNumberDemo());
+      await tester.pump();
+
+      for (final String label in <String>[
+        'Gallery',
+        'Portfolio',
+        'Playground',
+      ]) {
+        await tester.tap(tab(label));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: '$label overflowed');
+      }
     });
   });
 
@@ -126,45 +161,6 @@ void main() {
       ticker.reset();
       expect(ticker.total, open);
       ticker.dispose();
-    });
-  });
-
-  group('RecordScreen', () {
-    test('fromRouteName resolves every style and the hero', () {
-      for (final NumberMotionStyle style in NumberMotionStyle.values) {
-        final RecordScreen? screen = RecordScreen.fromRouteName(
-          recordRouteFor(style),
-        );
-        expect(screen, isNotNull, reason: 'no route for $style');
-        expect(screen!.style, style);
-        expect(screen.hero, isFalse);
-      }
-      expect(RecordScreen.fromRouteName('/record/hero')?.hero, isTrue);
-    });
-
-    test('fromRouteName declines anything else', () {
-      expect(RecordScreen.fromRouteName(null), isNull);
-      expect(RecordScreen.fromRouteName('/'), isNull);
-      expect(RecordScreen.fromRouteName('/record/'), isNull);
-      expect(RecordScreen.fromRouteName('/record/nope'), isNull);
-    });
-
-    testWidgets('renders chrome-free, so nothing lands in the crop', (
-      WidgetTester tester,
-    ) async {
-      await tester.pumpWidget(
-        const MaterialApp(home: RecordScreen(style: NumberMotionStyle.flip)),
-      );
-      await tester.pump();
-
-      expect(find.byType(AppBar), findsNothing);
-      expect(find.byType(NavigationBar), findsNothing);
-      expect(find.text('flip'), findsOneWidget);
-
-      // Let one beat pass, then tear the screen down so its periodic timer is
-      // cancelled in dispose rather than left pending at the end of the test.
-      await tester.pump(const Duration(milliseconds: 2200));
-      await tester.pumpWidget(const SizedBox.shrink());
     });
   });
 }

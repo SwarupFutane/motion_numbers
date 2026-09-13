@@ -4,8 +4,7 @@ Numbers that **arrive** instead of appearing. Every digit rolls on its own
 timeline, the motion knows whether the value went up or down, and seven styles
 share one animation controller.
 
-<!-- HERO GIF — recorded in Phase 7 from the example app. Absolute URL, because
-     pub.dev does not resolve relative paths. -->
+<!-- HERO GIF. Absolute URL, because pub.dev does not resolve relative paths. -->
 ![motion_number rolling a currency value](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/hero.gif)
 
 ```dart
@@ -36,8 +35,8 @@ instead of snapping.
 
 ## The seven styles
 
-<!-- One short loop per style, recorded in Phase 7. Keep each under ~1 MB: the
-     README loads on every package view. -->
+<!-- One short loop per style. Keep each under ~1 MB: the README loads on every
+     package view. -->
 
 | rolling | odometer | slotMachine |
 |---|---|---|

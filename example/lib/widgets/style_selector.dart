@@ -1,15 +1,18 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:motion_number/motion_number.dart';
 
+import '../app_theme.dart';
 import '../tuning.dart';
 
-/// A chip per [NumberMotionStyle], which is the whole style switcher.
+/// A horizontally scrolling row of capsules, one per [NumberMotionStyle].
+///
+/// Seven options is too many for a segmented control at phone width, so this
+/// follows the filter-pill pattern from Apple's own apps instead.
 class StyleSelector extends StatelessWidget {
   /// Creates a selector.
   const StyleSelector({
     required this.value,
     required this.onChanged,
-    this.alignment = WrapAlignment.start,
     super.key,
   });
 
@@ -19,21 +22,75 @@ class StyleSelector extends StatelessWidget {
   /// Called with the newly selected style.
   final ValueChanged<NumberMotionStyle> onChanged;
 
-  /// How the chips are distributed along each line.
-  final WrapAlignment alignment;
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Row(
+      children: <Widget>[
+        for (final NumberMotionStyle style in NumberMotionStyle.values)
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: 8),
+            child: StylePill(
+              label: styleLabel(style),
+              selected: style == value,
+              onTap: () => onChanged(style),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+/// One capsule in a [StyleSelector].
+class StylePill extends StatelessWidget {
+  /// Creates a pill.
+  const StylePill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  /// The style's name.
+  final String label;
+
+  /// Whether this is the current style.
+  final bool selected;
+
+  /// Called on tap.
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Wrap(
-    spacing: 8,
-    runSpacing: 8,
-    alignment: alignment,
-    children: <Widget>[
-      for (final NumberMotionStyle style in NumberMotionStyle.values)
-        ChoiceChip(
-          label: Text(styleLabel(style)),
-          selected: style == value,
-          onSelected: (_) => onChanged(style),
+  Widget build(BuildContext context) {
+    final Color blue = resolveColor(CupertinoColors.systemBlue, context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: selected
+                ? blue
+                : resolveColor(CupertinoColors.tertiarySystemFill, context),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Text(
+            label,
+            style: AppType.subheadline.copyWith(
+              fontWeight: FontWeight.w600,
+              color: selected
+                  ? CupertinoColors.white
+                  : resolveColor(CupertinoColors.label, context),
+            ),
+          ),
         ),
-    ],
-  );
+      ),
+    );
+  }
 }

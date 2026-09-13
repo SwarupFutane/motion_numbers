@@ -1,7 +1,8 @@
 # motion_number — example
 
-The showcase app. Three tabs, one shared tuning, plus the chrome-free route the
-README GIFs are recorded from.
+The showcase app. Three tabs and one shared tuning, in an iOS-style shell —
+large titles, inset-grouped sections, system colours, SF Pro on Apple platforms
+and the bundled Inter everywhere else.
 
 ```bash
 cd example
@@ -39,19 +40,6 @@ holding row gets **its own `MotionNumberScope`**. A `MotionNumber` publishes
 into the nearest ancestor scope, so four numbers under one scope would all
 overwrite the same transition and every delta on screen would show whichever
 row ticked last.
-
-## Recording
-
-The `/record/<style>` route renders one style looping on a fixed cadence with no
-app bar and no nav bar. On web it is addressable directly:
-
-```bash
-flutter run -d chrome --release
-# then navigate to #/record/flip
-```
-
-See [`../doc/RECORDING.md`](../doc/RECORDING.md) for the capture commands and
-the size budget.
 
 ## Tests
 

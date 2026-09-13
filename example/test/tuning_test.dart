@@ -1,4 +1,3 @@
-import 'package:example/screens/record_screen.dart';
 import 'package:example/tuning.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:motion_number/motion_number.dart';
@@ -93,15 +92,6 @@ void main() {
         NumberMotionStyle.rolling,
       ).copyWith(duration: const Duration(milliseconds: 1234));
       expect(tuning.snippet, contains('Duration(milliseconds: 1234)'));
-    });
-  });
-
-  group('recordRouteFor', () {
-    test('round-trips through RecordScreen.fromRouteName', () {
-      for (final NumberMotionStyle style in NumberMotionStyle.values) {
-        expect(recordRouteFor(style), '/record/${styleLabel(style)}');
-        expect(RecordScreen.fromRouteName(recordRouteFor(style))?.style, style);
-      }
     });
   });
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:motion_number/motion_number.dart';
 
 /// The three knobs this demo exposes, and the [DigitMotion] they add up to.
@@ -126,7 +126,3 @@ String styleBlurb(NumberMotionStyle style) => switch (style) {
   NumberMotionStyle.shuffle => 'Scrambles, then settles. The decrypting look.',
   NumberMotionStyle.elastic => 'Rolling with overshoot and a scale pop.',
 };
-
-/// The route name that records [style] as a README GIF.
-String recordRouteFor(NumberMotionStyle style) =>
-    '/record/${styleLabel(style)}';

@@ -52,8 +52,50 @@ class FlipMotion extends DigitMotion {
     final int from = data.fromDigit!;
     final int to = data.toDigit!;
 
-    // A falling value folds the other way, so a decrease reads as a decrease.
-    final double axis = data.direction.isDown ? -1 : 1;
+    // A rising value folds downward, the way a split-flap board turns. A
+    // falling value runs the same sequence mirrored — the old bottom lifts,
+    // then the new top settles — so a decrease reads as a decrease.
+    final bool down = data.direction.isDown;
+
+    // Phase one covers the first half of the timeline, phase two the second.
+    // Each flap turns a quarter-turn about the fold line, edge-on at the seam.
+    final bool phaseOne = t < 0.5;
+    final double fold = phaseOne ? t / 0.5 : 1 - (t - 0.5) / 0.5;
+    final double angle = math.pi / 2 * fold.clamp(0.0, 1.0);
+
+    // Rising: the old top folds down, then the new bottom lands.
+    // Falling: the old bottom lifts up, then the new top lands.
+    final bool flapIsTop = down != phaseOne;
+    final int flapDigit = phaseOne ? from : to;
+
+    // The static halves: what the flap uncovers in phase one, and what it
+    // lands on in phase two. For a rising value that is the new top over the
+    // old bottom; a falling value is the mirror image.
+    final int topDigit = down ? from : to;
+    final int bottomDigit = down ? to : from;
+
+    // A real flap is an opaque card, so the half behind it is hidden wherever
+    // the card is. Glyphs here are transparent, so that half is clipped to the
+    // band the flap has not reached — otherwise the two digits show through
+    // each other for the whole transition.
+    final double seam = data.cellHeight / 2;
+    final double reach = _projectedReach(seam, angle);
+
+    Widget covered(int digit, {required bool top}) => ClipRect(
+      clipper: _BandClipper(
+        top ? 0 : seam + reach,
+        top ? seam - reach : data.cellHeight,
+      ),
+      child: _half(data, digit, top: top),
+    );
+
+    // A positive X-rotation tips a top half's free edge toward the viewer and
+    // a bottom half's away, so the bottom takes the negative angle — both
+    // flaps swing out in front of the board rather than behind it.
+    final Widget flap = _rotated(
+      _half(data, flapDigit, top: flapIsTop),
+      flapIsTop ? angle : -angle,
+    );
 
     return SizedBox(
       width: data.cellWidth,
@@ -61,26 +103,35 @@ class FlipMotion extends DigitMotion {
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          // Behind everything: the new top and the old bottom.
-          _half(data, to, top: true),
-          _half(data, from, top: false),
-          if (t < 0.5)
-            // Phase one: the old top folds away, uncovering the new top.
-            _rotated(
-              child: _half(data, from, top: true),
-              angle: -axis * math.pi / 2 * (t / 0.5),
-              alignment: Alignment.bottomCenter,
-            )
+          if (flapIsTop)
+            covered(topDigit, top: true)
           else
-            // Phase two: the new bottom drops to cover the old one.
-            _rotated(
-              child: _half(data, to, top: false),
-              angle: axis * math.pi / 2 * (1 - (t - 0.5) / 0.5),
-              alignment: Alignment.topCenter,
-            ),
+            _half(data, topDigit, top: true),
+          if (flapIsTop)
+            _half(data, bottomDigit, top: false)
+          else
+            covered(bottomDigit, top: false),
+          flap,
         ],
       ),
     );
+  }
+
+  /// The perspective used by [_rotated], as the `(3, 2)` matrix entry.
+  static const double _perspective = 0.0015;
+
+  /// How far from the seam a flap of [halfHeight] reaches when turned by
+  /// [angle], after perspective.
+  ///
+  /// The flap swings toward the viewer, so perspective magnifies it: its free
+  /// edge lands a little further from the seam than `cos(angle)` alone says.
+  /// Clipping to the unmagnified reach would leave a sliver of overlap.
+  static double _projectedReach(double halfHeight, double angle) {
+    final double w = 1 - _perspective * halfHeight * math.sin(angle);
+    if (w <= 0) {
+      return halfHeight;
+    }
+    return (halfHeight * math.cos(angle) / w).clamp(0.0, halfHeight);
   }
 
   /// One half of a digit, clipped at the fold line.
@@ -99,16 +150,33 @@ class FlipMotion extends DigitMotion {
     ),
   );
 
-  /// Applies a perspective X-rotation hinged on [alignment].
-  Widget _rotated({
-    required Widget child,
-    required double angle,
-    required Alignment alignment,
-  }) => Transform(
-    alignment: alignment,
+  /// Applies a perspective X-rotation hinged on the fold line.
+  ///
+  /// [child] is a [_half], which fills the whole cell and places its visible
+  /// half against one edge — so the fold line is the cell's centre, not the
+  /// edge the half is aligned to. Hinging on that edge instead swings the flap
+  /// across the other half and the two digits pile into each other.
+  Widget _rotated(Widget child, double angle) => Transform(
+    alignment: Alignment.center,
     transform: Matrix4.identity()
-      ..setEntry(3, 2, 0.0015)
+      ..setEntry(3, 2, _perspective)
       ..rotateX(angle),
     child: child,
   );
+}
+
+/// Clips to a horizontal band of the cell, from [top] to [bottom].
+class _BandClipper extends CustomClipper<Rect> {
+  const _BandClipper(this.top, this.bottom);
+
+  final double top;
+  final double bottom;
+
+  @override
+  Rect getClip(Size size) =>
+      Rect.fromLTRB(0, top, size.width, math.max(top, bottom));
+
+  @override
+  bool shouldReclip(_BandClipper oldClipper) =>
+      oldClipper.top != top || oldClipper.bottom != bottom;
 }
