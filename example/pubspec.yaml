@@ -1,0 +1,35 @@
+name: example
+description: >-
+  Showcase app for motion_number: a style gallery, a live portfolio ticker and
+  a playground for duration and stagger.
+
+# Never published; it exists so pub.dev can render an Example tab.
+publish_to: 'none'
+
+version: 1.0.0+1
+
+# Matches the package's own floor, so anyone who can use motion_number can run
+# this example.
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # The working tree, not a published version. Getting this wrong means the
+  # example silently demos the wrong code.
+  motion_number:
+    path: ../
+
+  # Kept from the template: Material's adaptive widgets reference Cupertino
+  # icons, and dropping it makes every build print a missing-font warning.
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,19 +1,21 @@
 # doc/ — README media
 
-The eight files the README links to. **None of them exist yet**: they are
-recorded in Phase 7, from the example app, once the styles are final. Until
-then the images in the README render as broken links on GitHub and pub.dev.
+The eight files the README links to. **None of them exist yet.** The rig that
+produces them does: Phase 7 built the example app's `/record/<style>` route, and
+[`RECORDING.md`](RECORDING.md) is the step-by-step. Until the files are captured
+and pushed to `main`, the images in the README render as broken links on GitHub
+and pub.dev.
 
-| File | Shows |
-|---|---|
-| `hero.gif` | Above the fold. A currency value rolling, with the delta beside it. |
-| `rolling.gif` | One short loop per style — |
-| `odometer.gif` | short enough to read at a glance, |
-| `slot_machine.gif` | long enough to show the settle. |
-| `flip.gif` | |
-| `wave.gif` | |
-| `shuffle.gif` | |
-| `elastic.gif` | |
+| File | Route | Shows |
+|---|---|---|
+| `hero.gif` | `/record/hero` | Above the fold. A currency value rolling, with the delta beside it. |
+| `rolling.gif` | `/record/rolling` | One short loop per style — |
+| `odometer.gif` | `/record/odometer` | short enough to read at a glance, |
+| `slot_machine.gif` | `/record/slotMachine` | long enough to show the settle. |
+| `flip.gif` | `/record/flip` | |
+| `wave.gif` | `/record/wave` | |
+| `shuffle.gif` | `/record/shuffle` | |
+| `elastic.gif` | `/record/elastic` | |
 
 ## Rules
 
