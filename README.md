@@ -40,15 +40,15 @@ instead of snapping.
 | ![rolling](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/rolling.webp) | ![odometer](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/odometer.webp) | ![slot machine](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/slot_machine.webp) |
 | Shortest path, direction-aware. Clean and financial. The default. | A mechanical dial, always continuous, carrying `9 → 0`. | Extra revolutions before settling, staggered hard. |
 
-| flip | wave | shuffle |
+| elastic | wave | shuffle |
 |---|---|---|
-| ![flip](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/flip.webp) | ![wave](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/wave.webp) | ![shuffle](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/shuffle.webp) |
-| Split-flap board: the old digit folds away, the new one falls in. | Rolling with a sinusoidal offset across the row. | Random digits, then a settle. The "decrypting" look. |
+| ![elastic](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/elastic.webp) | ![wave](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/wave.webp) | ![shuffle](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/shuffle.webp) |
+| Rolling with overshoot and a small scale pop. | Rolling with a sinusoidal offset across the row. | Random digits, then a settle. The "decrypting" look. |
 
-| elastic |
+| flip |
 |---|
-| ![elastic](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/elastic.webp) |
-| Rolling with overshoot and a small scale pop. |
+| ![flip](https://raw.githubusercontent.com/SwarupFutane/motion_numbers/main/doc/flip.webp) |
+| Split-flap board: the old digit folds away, the new one falls in. |
 
 ```dart
 MotionNumber(value: 131890, style: NumberMotionStyle.flip)
