@@ -54,6 +54,10 @@ jobs:
       - name: pana
         continue-on-error: true
         run: |
+          # pana shells out to these to validate screenshots; without them it
+          # reports "No such file or directory" for every image and scores the
+          # example-and-screenshots check 0. pub.dev's analyzer has them.
+          sudo apt-get update -qq && sudo apt-get install -y -qq webp imagemagick
           dart pub global activate pana
           dart pub global run pana --no-warning --exit-code-threshold 0 .
 
