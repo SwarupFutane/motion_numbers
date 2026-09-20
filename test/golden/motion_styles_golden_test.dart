@@ -28,36 +28,45 @@ final bool _thisPlatformRecords =
 /// binary out of the published archive.
 final File? _roboto = _findRoboto();
 
-/// The SDK's `roboto-regular.ttf`, or `null` if no candidate path has it.
-///
-/// `FLUTTER_ROOT` alone is not enough: it is unset in some runners and points
-/// at the outer checkout in the monorepo layout, where the SDK sits one level
-/// down in `src/flutter`. The test binary itself is the reliable anchor —
-/// `flutter_tester` lives in `bin/cache/artifacts/engine/<platform>/`, so the
-/// fonts are two directories up from the engine folder.
+/// The directories [_findRoboto] looked in, for the skip message.
 List<String> _candidates = <String>[];
 
+/// The SDK's Roboto, or `null` if no candidate directory holds it.
+///
+/// Two things vary and both have bitten this suite. `FLUTTER_ROOT` points at
+/// the SDK in one layout and at the outer checkout in the monorepo one, where
+/// the SDK sits under `src/flutter`; and the file is named `Roboto-Regular.ttf`
+/// in some SDK builds and `roboto-regular.ttf` in others — a difference Windows
+/// hides and Linux does not. So: try each layout, then match the name without
+/// regard to case.
 File? _findRoboto() {
-  const String leaf = 'material_fonts/roboto-regular.ttf';
+  const String fonts = 'bin/cache/artifacts/material_fonts';
   final String? root = Platform.environment['FLUTTER_ROOT'];
   _candidates = <String>[
-    if (root != null) '$root/bin/cache/artifacts/$leaf',
-    if (root != null) '$root/src/flutter/bin/cache/artifacts/$leaf',
+    if (root != null) '$root/$fonts',
+    if (root != null) '$root/src/flutter/$fonts',
   ];
 
+  // The test binary is the anchor that needs no environment: flutter_tester
+  // lives in bin/cache/artifacts/engine/<platform>/.
   Directory dir = File(Platform.resolvedExecutable).parent;
   while (dir.path != dir.parent.path) {
-    if (dir.path.endsWith('artifacts') || dir.path.endsWith('cache')) {
-      _candidates.add('${dir.path}/$leaf');
-      _candidates.add('${dir.path}/artifacts/$leaf');
+    if (dir.path.endsWith('artifacts')) {
+      _candidates.add('${dir.path}/material_fonts');
     }
     dir = dir.parent;
   }
 
   for (final String path in _candidates) {
-    final File file = File(path);
-    if (file.existsSync()) {
-      return file;
+    final Directory directory = Directory(path);
+    if (!directory.existsSync()) {
+      continue;
+    }
+    for (final FileSystemEntity entity in directory.listSync()) {
+      if (entity is File &&
+          entity.uri.pathSegments.last.toLowerCase() == 'roboto-regular.ttf') {
+        return entity;
+      }
     }
   }
   return null;
@@ -69,9 +78,8 @@ String? get _skip {
     return 'baselines are recorded on Linux only';
   }
   if (_roboto == null) {
-    return 'roboto-regular.ttf not found in ${_candidates.join(', ')} '
-        '(FLUTTER_ROOT=${Platform.environment['FLUTTER_ROOT']}, '
-        'executable=${Platform.resolvedExecutable}) — run `flutter precache`';
+    return 'Roboto not found in ${_candidates.join(', ')} '
+        '— run `flutter precache`';
   }
   return null;
 }

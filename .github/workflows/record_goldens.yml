@@ -25,15 +25,6 @@ jobs:
       - name: Fetch the material fonts
         run: flutter precache --universal
 
-      # Temporary: shows where the SDK actually keeps its fonts on the runner.
-      - name: Where are the fonts
-        run: |
-          echo "FLUTTER_ROOT=$FLUTTER_ROOT"
-          ls -la "$FLUTTER_ROOT" || true
-          ls -la "$FLUTTER_ROOT/bin/cache/artifacts" || true
-          find "$FLUTTER_ROOT" -iname 'roboto*regular*' -print 2>/dev/null | head -20
-          find / -iname 'roboto-regular.ttf' -print 2>/dev/null | head -10
-
       - name: Record baselines
         run: flutter test --tags golden --update-goldens
 
