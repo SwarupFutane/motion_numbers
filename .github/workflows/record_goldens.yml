@@ -19,6 +19,12 @@ jobs:
 
       - run: flutter pub get
 
+      # The frames render in Roboto, loaded from the SDK cache rather than
+      # vendored into the repo. Without this the whole tier skips itself and
+      # the upload below finds nothing.
+      - name: Fetch the material fonts
+        run: flutter precache --universal
+
       - name: Record baselines
         run: flutter test --tags golden --update-goldens
 

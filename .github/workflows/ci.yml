@@ -38,7 +38,9 @@ jobs:
       # "Record goldens" workflow, never on a local Windows or macOS machine.
       - name: Test (golden tier)
         if: hashFiles('test/golden/goldens/*.png') != ''
-        run: flutter test --tags golden
+        run: |
+          flutter precache --universal
+          flutter test --tags golden
 
       - name: API docs
         run: dart doc --dry-run .
