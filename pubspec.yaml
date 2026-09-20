@@ -8,6 +8,35 @@ repository: https://github.com/SwarupFutane/motion_numbers
 issue_tracker: https://github.com/SwarupFutane/motion_numbers/issues
 documentation: https://github.com/SwarupFutane/motion_numbers#readme
 
+# Rendered on the listing card as well as the package page, and these are the
+# same animated loops the README links to. rolling comes first because the
+# thumbnail is generated from the first screenshot's opening frame.
+screenshots:
+  - description: >-
+      A currency value rolling up and down, direction colours and the
+      percentage delta following it.
+    path: doc/rolling.webp
+  - description: >-
+      The odometer style: a mechanical dial, always continuous, carrying nine
+      to zero.
+    path: doc/odometer.webp
+  - description: >-
+      The slot machine style: extra revolutions before each digit settles.
+    path: doc/slot_machine.webp
+  - description: >-
+      The flip style: a split-flap board where the old digit folds away and the
+      new one falls in.
+    path: doc/flip.webp
+  - description: >-
+      The wave style: rolling with a sinusoidal offset across the row.
+    path: doc/wave.webp
+  - description: >-
+      The shuffle style: random digits that scramble, then settle.
+    path: doc/shuffle.webp
+  - description: >-
+      The elastic style: rolling with overshoot and a small scale pop.
+    path: doc/elastic.webp
+
 topics:
   - animation
   - number

@@ -28,9 +28,8 @@ migrate_working_dir/
 .widget_preview/
 
 # --- Publish-only ---------------------------------------------------------
-# The README loads these from raw.githubusercontent.com by absolute URL, so
-# shipping them would only add megabytes to every download.
-/doc/*.webp
+# doc/*.webp is deliberately NOT excluded: every loop is a screenshot in
+# pubspec.yaml, and a screenshot missing from the archive fails validation.
 
 # CI configuration is repository plumbing, not package content.
 /.github/
