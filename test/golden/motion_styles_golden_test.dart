@@ -35,23 +35,26 @@ final File? _roboto = _findRoboto();
 /// down in `src/flutter`. The test binary itself is the reliable anchor —
 /// `flutter_tester` lives in `bin/cache/artifacts/engine/<platform>/`, so the
 /// fonts are two directories up from the engine folder.
+List<String> _candidates = <String>[];
+
 File? _findRoboto() {
   const String leaf = 'material_fonts/roboto-regular.ttf';
   final String? root = Platform.environment['FLUTTER_ROOT'];
-  final List<String> candidates = <String>[
+  _candidates = <String>[
     if (root != null) '$root/bin/cache/artifacts/$leaf',
     if (root != null) '$root/src/flutter/bin/cache/artifacts/$leaf',
   ];
 
   Directory dir = File(Platform.resolvedExecutable).parent;
   while (dir.path != dir.parent.path) {
-    if (dir.path.endsWith('artifacts')) {
-      candidates.add('${dir.path}/$leaf');
+    if (dir.path.endsWith('artifacts') || dir.path.endsWith('cache')) {
+      _candidates.add('${dir.path}/$leaf');
+      _candidates.add('${dir.path}/artifacts/$leaf');
     }
     dir = dir.parent;
   }
 
-  for (final String path in candidates) {
+  for (final String path in _candidates) {
     final File file = File(path);
     if (file.existsSync()) {
       return file;
@@ -66,7 +69,9 @@ String? get _skip {
     return 'baselines are recorded on Linux only';
   }
   if (_roboto == null) {
-    return 'roboto-regular.ttf not found — run `flutter precache`';
+    return 'roboto-regular.ttf not found in ${_candidates.join(', ')} '
+        '(FLUTTER_ROOT=${Platform.environment['FLUTTER_ROOT']}, '
+        'executable=${Platform.resolvedExecutable}) — run `flutter precache`';
   }
   return null;
 }
