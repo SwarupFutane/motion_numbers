@@ -1,0 +1,50 @@
+name: Publish to pub.dev
+
+# Automated publishing, as configured on pub.dev under Admin → Automated
+# publishing with the tag pattern v{{version}}. Pushing a tag is the release:
+#
+#   git tag v0.2.0 && git push origin v0.2.0
+#
+# No pub.dev credential exists in this repository or in GitHub secrets. The
+# id-token permission below lets GitHub vouch for this workflow's identity
+# directly to pub.dev, which is the whole security argument for doing it here
+# rather than from a laptop.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      # Required: the OIDC token pub.dev verifies. Without it the publish is
+      # rejected as unauthenticated.
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      # The same gate CI runs. A tag that fails here is a release that never
+      # happens, which is the point: pub.dev versions cannot be unpublished.
+      - name: Format
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: |
+          flutter precache --universal
+          flutter test
+
+      # --force skips the interactive confirmation, which has no terminal here.
+      - name: Publish
+        run: flutter pub publish --force
