@@ -24,19 +24,48 @@ final bool _thisPlatformRecords =
 /// The default test font draws every glyph as an identical filled box, which
 /// makes a digit strip a solid bar: all seven styles at all five samples come
 /// out byte-identical and the tier catches nothing. Real digit outlines are
-/// what makes a golden a golden. Taking the file from `FLUTTER_ROOT` keeps a
-/// 170 KB binary out of the published archive.
-final File _roboto = File(
-  '${Platform.environment['FLUTTER_ROOT']}'
-  '/bin/cache/artifacts/material_fonts/roboto-regular.ttf',
-);
+/// what makes a golden a golden. Borrowing the SDK's copy keeps a 170 KB
+/// binary out of the published archive.
+final File? _roboto = _findRoboto();
+
+/// The SDK's `roboto-regular.ttf`, or `null` if no candidate path has it.
+///
+/// `FLUTTER_ROOT` alone is not enough: it is unset in some runners and points
+/// at the outer checkout in the monorepo layout, where the SDK sits one level
+/// down in `src/flutter`. The test binary itself is the reliable anchor —
+/// `flutter_tester` lives in `bin/cache/artifacts/engine/<platform>/`, so the
+/// fonts are two directories up from the engine folder.
+File? _findRoboto() {
+  const String leaf = 'material_fonts/roboto-regular.ttf';
+  final String? root = Platform.environment['FLUTTER_ROOT'];
+  final List<String> candidates = <String>[
+    if (root != null) '$root/bin/cache/artifacts/$leaf',
+    if (root != null) '$root/src/flutter/bin/cache/artifacts/$leaf',
+  ];
+
+  Directory dir = File(Platform.resolvedExecutable).parent;
+  while (dir.path != dir.parent.path) {
+    if (dir.path.endsWith('artifacts')) {
+      candidates.add('${dir.path}/$leaf');
+    }
+    dir = dir.parent;
+  }
+
+  for (final String path in candidates) {
+    final File file = File(path);
+    if (file.existsSync()) {
+      return file;
+    }
+  }
+  return null;
+}
 
 /// Why the golden tier is not running, or `null` when it is.
 String? get _skip {
   if (!_thisPlatformRecords) {
     return 'baselines are recorded on Linux only';
   }
-  if (!_roboto.existsSync()) {
+  if (_roboto == null) {
     return 'roboto-regular.ttf not found — run `flutter precache`';
   }
   return null;
@@ -92,7 +121,7 @@ void main() {
     if (_skip != null) {
       return;
     }
-    final Uint8List bytes = _roboto.readAsBytesSync();
+    final Uint8List bytes = _roboto!.readAsBytesSync();
     await (FontLoader(
       'Roboto',
     )..addFont(Future<ByteData>.value(ByteData.sublistView(bytes)))).load();
